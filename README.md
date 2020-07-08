@@ -51,7 +51,7 @@ SCAE-Unsup|35
 
 Learned part templates from the SCAE-Unsupervised experiment:
 
-![](images/template.PNG =300x)
+![](images/template.png =300x)
 
 ### Trained Models
 Pre-trained model weights are available [here](checkpoints).
