@@ -22,7 +22,7 @@ this was to perform noise-removal pre-processing steps from the raw images. Data
 from 40 participants  with each participant having to write 25 words.
 
 The dataset is available
-[here](https://drive.google.com/drive/folders/1fxRbrKg6MF9De0tOhYd5XkUfogE_XuLX?usp=sharing).
+[here](https://drive.google.com/drive/folders/1FjuAX7xHgNSsP1ZxF_EsJIxzdRHrZGDl?usp=sharing).
 
 ### Experiments
 
