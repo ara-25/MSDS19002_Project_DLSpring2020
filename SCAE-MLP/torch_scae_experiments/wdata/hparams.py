@@ -1,8 +1,8 @@
 model_params = dict(
-    image_shape=(1, 60, 102),
+    image_shape=(1, 70, 70),
     n_classes=50,
-    n_part_caps=32,
-    n_obj_caps=64,
+    n_part_caps=85,
+    n_obj_caps=50,
     pcae_cnn_encoder_params=dict(
         out_channels=[128] * 4,
         kernel_sizes=[3, 3, 3, 3],
@@ -12,7 +12,7 @@ model_params = dict(
     pcae_encoder_params=dict(
         n_poses=6,
         n_special_features=16,
-        similarity_transform=False,
+        similarity_transform=True,
     ),
     pcae_template_generator_params=dict(
         template_size=(11, 11),
@@ -21,7 +21,7 @@ model_params = dict(
         color_nonlin='sigmoid',
     ),
     pcae_decoder_params=dict(
-        learn_output_scale=False,
+        learn_output_scale=True,
         use_alpha_channel=True,
         background_value=True,
     ),
@@ -50,11 +50,11 @@ model_params = dict(
         caps_ll_weight=1.,
         cpr_dynamic_reg_weight=10,
         prior_sparsity_loss_type='l2',
-        prior_within_example_sparsity_weight=2.0,
-        prior_between_example_sparsity_weight=0.35,
+        prior_within_example_sparsity_weight=0.23,
+        prior_between_example_sparsity_weight=0.05,
         posterior_sparsity_loss_type='entropy',
-        posterior_within_example_sparsity_weight=0.7,
-        posterior_between_example_sparsity_weight=0.2,
+        posterior_within_example_sparsity_weight=3.8,
+        posterior_between_example_sparsity_weight=0.3,
         reconstruct_alternatives=False,
     )
 )
