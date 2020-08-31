@@ -1,6 +1,8 @@
 import operator
 import pathlib
 import re
+import cv2
+import numpy as np
 from functools import reduce
 from PIL import Image, ImageOps
 
@@ -47,19 +49,10 @@ class Invert(object):
         if not FF._is_pil_image(img):
             raise TypeError('img should be PIL Image. Got {}'.format(type(img)))
 
-        if img.mode == 'RGBA':
-            r, g, b, a = img.split()
-            rgb = Image.merge('RGB', (r, g, b))
-            inv = ImageOps.invert(rgb)
-            r, g, b = inv.split()
-            inv = Image.merge('RGBA', (r, g, b, a))
-        elif img.mode == 'LA':
-            l, a = img.split()
-            l = ImageOps.invert(l)
-            inv = Image.merge('LA', (l, a))
-        else:
-            inv = ImageOps.invert(img)
-        return inv
+        cv_image = np.asarray(img)
+        ret, thresh = cv2.threshold(cv_image,0,255,cv2.THRESH_BINARY_INV+
+                                    cv2.THRESH_OTSU)
+        return Image.fromarray(thresh)
 
     def __call__(self, img):
         """
