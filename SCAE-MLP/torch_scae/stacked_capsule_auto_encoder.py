@@ -91,11 +91,9 @@ class SCAE(nn.Module):
         self.reconstruct_alternatives = reconstruct_alternatives
 
         self.dense = nn.Sequential(
-            nn.Linear(obj_encoder.n_outputs, 128),
-            nn.Sigmoid(),
-            nn.Linear(128, 128),
-            nn.Sigmoid(),
-            nn.Linear(128, n_classes)
+            nn.Linear(obj_encoder.n_outputs*obj_encoder.out_dim, 512),
+            nn.LeakyReLU(),
+            nn.Linear(512, n_classes)
         )
 
     def forward(self, image):
@@ -135,7 +133,7 @@ class SCAE(nn.Module):
 
         obj_encoding = self.obj_encoder(parts_with_templates, input_presence)
 
-        pred_out = self.dense(caps_lt_weight)
+        pred_out = self.dense(obj_encoding.view(obj_encoding.shape[0], -1))
 
         del input_part_param, input_templates, parts_with_templates, input_presence
 
@@ -212,7 +210,6 @@ class SCAE(nn.Module):
         res.templates = templates
         res.template_presence = part_enc_res.presence
         res.transformed_templates = res.rec.transformed_templates
-
         res.pred_out = pred_out
 
         if self.n_classes is not None:
@@ -300,7 +297,7 @@ class SCAE(nn.Module):
             log.update(prior_cls_xe=prior_cls_xe, posterior_cls_xe=posterior_cls_xe)
 
         # Classification loss
-        c_loss = F.cross_entropy(res.pred_out, target=label)
+        c_loss = 1000 * F.cross_entropy(res.pred_out, target=label)
         loss += c_loss
         log.update(c_loss=c_loss)
 
