@@ -99,24 +99,24 @@ class SCAEMNIST(LightningModule):
         transforms = torchvision.transforms.Compose([
             torchvision.transforms.Grayscale(),
             Invert(),
-            torchvision.transforms.Resize(60),
+            torchvision.transforms.Resize((70, 70)),
             torchvision.transforms.ToTensor()
         ])
-        # image_size = (28, 28)
-        # output_size = self.hparams.model_config['image_shape'][1:]
+        return transforms
+    def make_transforms_affine(self):
+        image_size = (50, 50)
+        output_size = self.hparams.model_config['image_shape'][1:]
+        padding = tuple((output_size[i] - image_size[i]) // 2 for i in range(len(output_size)))
+        translate = tuple(p / o for p, o in zip(padding, output_size))
 
-        # if output_size[0] != image_size[0]:
-        #     padding = tuple((output_size[i] - image_size[i]) // 2 for i in range(len(output_size)))
-        #     translate = tuple(p / o for p, o in zip(padding, output_size))
-
-        #     transforms = torchvision.transforms.Compose([
-        #         torchvision.transforms.Pad(padding, fill=0, padding_mode='constant'),
-        #         torchvision.transforms.RandomAffine(degrees=0, translate=translate, fillcolor=0),
-        #         torchvision.transforms.ToTensor(),
-        #     ])
-        # else:
-        #     transforms = torchvision.transforms.ToTensor()
-
+        transforms = torchvision.transforms.Compose([
+            torchvision.transforms.Grayscale(),
+            Binarize(),
+            torchvision.transforms.Resize((50,50)),
+            torchvision.transforms.Pad(padding, fill=0, padding_mode='constant'),
+            torchvision.transforms.RandomAffine(degrees=0, translate=translate, fillcolor=0),
+            torchvision.transforms.ToTensor()
+        ])
         return transforms
 
     def prepare_data(self):
@@ -129,11 +129,11 @@ class SCAEMNIST(LightningModule):
         # test dataset
         # mnist_test = MNIST(data_dir, train=False, download=True, transform=torchvision.transforms.ToTensor())
 
-        mnist_train = ImageFolder("/content/dataset/train", transform=self.make_transforms())
-        mnist_val = ImageFolder("/content/dataset/val", transform=self.make_transforms())
+        mnist_train = ImageFolder("/content/dataset/train", transform=self.make_transforms_affine())
+        mnist_val = ImageFolder("/content/dataset/val", transform=self.make_transforms_affine())
         
         # mnist_train, mnist_val = random_split(mnist_train, [5500, 503])
-        mnist_test = ImageFolder("/content/dataset/test", transform=self.make_transforms())
+        mnist_test = ImageFolder("/content/dataset/test", transform=self.make_transforms_affine())
 
 
         # assign to use in data loaders
@@ -144,7 +144,7 @@ class SCAEMNIST(LightningModule):
     def train_dataloader(self):
         return DataLoader(self.train_dataset,
                           batch_size=self.hparams.batch_size,
-                          num_workers=self.hparams.num_workers)
+                          num_workers=self.hparams.num_workers, shuffle=True)
 
     def val_dataloader(self):
         return DataLoader(self.val_dataset,
@@ -291,15 +291,10 @@ def train(model_params, **training_kwargs):
     # model = SCAEMNIST()
     # model = SCAEMNIST.load_from_checkpoint('/content/lightning_logs/version_0/checkpoints/epoch=48.ckpt')
 
-    # training_params.update(resume_from_checkpoint='/content/lightning_logs/version_10/checkpoints/epoch=72.ckpt')
     checkpoint_callback = ModelCheckpoint(
             save_top_k=5)
     training_params.update(checkpoint_callback=checkpoint_callback)
-    # if 'save_top_k' in training_params:
-    #     checkpoint_callback = ModelCheckpoint(
-    #         save_top_k=training_params['save_top_k'])
-    #     training_params.update(checkpoint_callback=checkpoint_callback)
-    #     del training_params['save_top_k']
+    
     training_params.update(gpus=1, auto_select_gpus=True)
     trainer = Trainer(**training_params)
     trainer.fit(model)
